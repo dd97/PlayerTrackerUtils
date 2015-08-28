@@ -1,0 +1,91 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+CommonUtilities
+</name>
+</assembly>
+<members>
+<member name="T:CommonUtilities.My.Resources.Resources">
+<summary>
+  A strongly-typed resource class, for looking up localized strings, etc.
+</summary>
+</member>
+<member name="P:CommonUtilities.My.Resources.Resources.ResourceManager">
+<summary>
+  Returns the cached ResourceManager instance used by this class.
+</summary>
+</member>
+<member name="P:CommonUtilities.My.Resources.Resources.Culture">
+<summary>
+  Overrides the current thread's CurrentUICulture property for all
+  resource lookups using this strongly typed resource class.
+</summary>
+</member>
+<member name="M:CommonUtilities.TcpServerListener.FindOpenPort(System.String)">
+ <summary>
+ checks the list of ports that was passed to the program and returns the first available port.
+ </summary>
+ <param name="ports"></param>
+ <returns></returns>
+ <remarks></remarks>
+</member>
+<member name="T:CommonUtilities.TraceLogger">
+ <summary>
+ Class with static methods to log to a tracelistener
+ </summary>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.SerializeObjectDCS(System.Type,System.Object,System.String)">
+ <summary>
+ Persists an object to a file using the DataContractSerializer. (supports dictionaries)
+ </summary>
+ <param name="t">the type of object</param>
+ <param name="obj">the object to persist</param>
+ <param name="filePath">the full path and filename.</param>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.DeserializeObjectDCS(System.Type,System.String)">
+ <summary>
+ Takes a file and converts it back to an object using the DataContractSerializer. (supports dictionaries)
+ </summary>
+ <param name="t">the object type.</param>
+ <param name="filePath">the full path and filename to convert.</param>
+ <returns>the object.</returns>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.SerializeObject(System.Type,System.Object,System.String)">
+ <summary>
+ Converts an object to xml using the XmlSerializer.
+ </summary>
+ <param name="t">the object type</param>
+ <param name="obj">the object to serialize</param>
+ <param name="filePath">the full path and filename.</param>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.DeserializeObject(System.Type,System.String)">
+ <summary>
+ Converts a file to an object using the XmlSerializer.
+ </summary>
+ <param name="t">the object type</param>
+ <param name="filePath">the full path and filename.</param>
+ <returns></returns>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.FormatUserName(System.String)">
+ <summary>
+ Shaves the domain off the user id
+ </summary>
+ <param name="user">Pass in My.User.Name for the user parameter.</param>
+ <returns></returns>
+ <remarks></remarks>
+</member>
+<member name="M:CommonUtilities.Util.GetFilesDirectory">
+ <summary>
+ Creates/Gets the working directory for this app.
+ </summary>
+ <returns></returns>
+ <remarks></remarks>
+</member>
+</members>
+</doc>

@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "NFLPlayerScraper", "NFLPlayerScraper\NFLPlayerScraper.vbproj", "{3B075BFA-42FC-4E89-923E-DAD0E7975661}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TestHarness", "TestHarness\TestHarness.vbproj", "{B970CF79-8113-4313-BA3C-5527A82D2BFD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SharedBin", "SharedBin", "{58051455-4230-43DE-9A0E-E1B0E0A57E7E}"
+	ProjectSection(SolutionItems) = preProject
+		SharedBin\CommonUtilities.dll = SharedBin\CommonUtilities.dll
+		SharedBin\CommonUtilities.pdb = SharedBin\CommonUtilities.pdb
+		SharedBin\CommonUtilities.xml = SharedBin\CommonUtilities.xml
+		SharedBin\FantasyHelperObjects.dll = SharedBin\FantasyHelperObjects.dll
+		SharedBin\FantasyHelperObjects.pdb = SharedBin\FantasyHelperObjects.pdb
+		SharedBin\FantasyHelperObjects.xml = SharedBin\FantasyHelperObjects.xml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B075BFA-42FC-4E89-923E-DAD0E7975661}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B075BFA-42FC-4E89-923E-DAD0E7975661}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B075BFA-42FC-4E89-923E-DAD0E7975661}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B075BFA-42FC-4E89-923E-DAD0E7975661}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B970CF79-8113-4313-BA3C-5527A82D2BFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B970CF79-8113-4313-BA3C-5527A82D2BFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B970CF79-8113-4313-BA3C-5527A82D2BFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B970CF79-8113-4313-BA3C-5527A82D2BFD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

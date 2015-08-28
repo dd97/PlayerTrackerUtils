@@ -51,10 +51,6 @@
     <Reference Include="CommonUtilities">
       <HintPath>..\SharedBin\CommonUtilities.dll</HintPath>
     </Reference>
-    <Reference Include="FantasyHelperObjects, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\SharedBin\FantasyHelperObjects.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -127,6 +123,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FantasyHelperObjects\FantasyHelperObjects.vbproj">
+      <Project>{cca88fd5-2ecf-47e8-9235-37f7ea37c3dd}</Project>
+      <Name>FantasyHelperObjects</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NFLPlayerScraper\NFLPlayerScraper.vbproj">
       <Project>{3b075bfa-42fc-4e89-923e-dad0e7975661}</Project>
       <Name>NFLPlayerScraper</Name>

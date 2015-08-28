@@ -14,10 +14,13 @@ Public Class FoxSportsPlayerScraper
     Private _numPagesQueued As Integer = 0
     Private _numPagesProcessed As Integer = 0
     Private _numPlayersFound As Integer = 0
+    Private _league As IProLeagues
+    Private _finishedQueueingPages As Boolean = False
 
-    Public Sub New(rootUrl As String, playersUrl As String)
+    Public Sub New(rootUrl As String, playersUrl As String, l As IProLeagues)
         _rootUrl = rootUrl
         _playersUrl = playersUrl
+        _league = l
     End Sub
 
     Public Sub FetchPlayers()
@@ -27,6 +30,10 @@ Public Class FoxSportsPlayerScraper
         Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePage)
         Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePage)
     End Sub
+
+    Public Function IsProcessingComplete() As Boolean
+        Return (_numPagesQueued = _numPagesProcessed) And _finishedQueueingPages
+    End Function
 
     Private Sub ParsePage()
         Dim timesQueueWasEmpty As Integer = 0
@@ -53,7 +60,8 @@ Public Class FoxSportsPlayerScraper
                     _numPagesProcessed += 1
                 Else
                     timesQueueWasEmpty += 1
-                    If timesQueueWasEmpty > 20 Then
+                    If timesQueueWasEmpty > 6 And IsProcessingComplete() Then
+                        Util.LogMeWithTimestamp("Pages queue was empty " + timesQueueWasEmpty.ToString + " times.")
                         Exit While
                     End If
                 End If
@@ -71,6 +79,9 @@ Public Class FoxSportsPlayerScraper
     ''' <param name="row">row in html table containing player data</param>
     Private Sub ParsePlayer(row As String)
         Dim p As New Player()
+
+        p.Sport = _league.GetSportId()
+
         Dim outerTagBegin, outerTagEnd, innerTagBegin, innerTagEnd As Integer
         outerTagBegin = row.IndexOf("<td", 0)
         outerTagEnd = row.IndexOf("</td>", outerTagBegin)
@@ -96,7 +107,14 @@ Public Class FoxSportsPlayerScraper
         Dim teamChunk As String = row.Substring(outerTagBegin, outerTagEnd - outerTagBegin + 5)
 
         l = Link.GetFirstLink(teamChunk)
-        p.TeamName = HttpUtility.HtmlDecode(l.Label).Trim()
+        Dim teamId As String = Nothing
+        If l IsNot Nothing Then
+            teamId = _league.GetTeamId(HttpUtility.HtmlDecode(l.Label).Trim())
+        End If
+        If String.IsNullOrEmpty(teamId) Then
+            teamId = "-1"
+        End If
+        p.TeamName = teamId
 
         outerTagBegin = row.IndexOf("<td", outerTagEnd)
         outerTagBegin = row.IndexOf(">", outerTagBegin)
@@ -106,7 +124,7 @@ Public Class FoxSportsPlayerScraper
         outerTagBegin = row.IndexOf("<td", outerTagEnd)
         outerTagBegin = row.IndexOf(">", outerTagBegin)
         outerTagEnd = row.IndexOf("</td>", outerTagBegin)
-        p.Position = HttpUtility.HtmlDecode(row.Substring(outerTagBegin + 1, outerTagEnd - outerTagBegin - 1))
+        p.Position = _league.GetPositionId(HttpUtility.HtmlDecode(row.Substring(outerTagBegin + 1, outerTagEnd - outerTagBegin - 1)))
 
         outerTagBegin = row.IndexOf("<td", outerTagEnd)
         outerTagBegin = row.IndexOf(">", outerTagBegin)
@@ -126,7 +144,11 @@ Public Class FoxSportsPlayerScraper
         outerTagBegin = row.IndexOf("<td", outerTagEnd)
         outerTagBegin = row.IndexOf(">", outerTagBegin)
         outerTagEnd = row.IndexOf("</td>", outerTagBegin)
-        p.Age = HttpUtility.HtmlDecode(row.Substring(outerTagBegin + 1, outerTagEnd - outerTagBegin - 1))
+        Dim age As String = HttpUtility.HtmlDecode(row.Substring(outerTagBegin + 1, outerTagEnd - outerTagBegin - 1))
+        If Not Integer.TryParse(age, New Integer) Then
+            age = "-1"
+        End If
+        p.Age = age
 
         outerTagBegin = row.IndexOf("<td", outerTagEnd)
         outerTagBegin = row.IndexOf(">", outerTagBegin)
@@ -147,6 +169,7 @@ Public Class FoxSportsPlayerScraper
                 Dim tagEnd As Integer
                 If tagBegin = -1 Then
                     Util.LogMeWithTimestamp("No more data. Exiting thread.")
+                    _finishedQueueingPages = True
                     Exit While
                 Else
                     tagEnd = page.IndexOf("</table>", tagBegin)

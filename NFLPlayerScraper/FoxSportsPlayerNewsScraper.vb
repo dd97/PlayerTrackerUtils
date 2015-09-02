@@ -9,6 +9,9 @@ Public Class FoxSportsPlayerNewsScraper
     Private _finishedQueueingPages As Boolean = False
     Private _numPagesQueued As Integer = 0
     Private _pages As New ThreadSafeBlockingQueue(Of String)
+    Private _playersCount As Integer = 0
+    Private _playerNewPagesCount As Integer = 0
+    Private _numNewsPagesProcessed As Integer = 0
 
 
     Public Sub New(conStr As String, l As IProLeagues)
@@ -17,39 +20,91 @@ Public Class FoxSportsPlayerNewsScraper
     End Sub
 
     Public Sub FetchPlayerNews()
-        Util.LogMeWithTimestamp("Starting get pages thread.")
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf QueuePages)
+        Util.LogMeWithTimestamp("Filling players queue.")
+        FillPlayersQueue()
+        Util.LogMeWithTimestamp("Starting get news pages thread.")
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf QueueNewsPages)
 
     End Sub
+
+    Private Sub ParseNews(row As String)
+
+    End Sub
+
+    Private Sub ParsePlayerNewsPage()
+        Dim timesQueueWasEmpty As Integer = 0
+        While True
+            Try
+                Dim page As String = _pages.Dequeue()
+                If Not String.IsNullOrEmpty(page) Then
+                    Dim tagBegin, tagEnd As Integer
+                    While True
+                        Try
+                            tagBegin = page.IndexOf("<tr", tagEnd)
+                            If tagBegin = -1 Then
+                                Exit While
+                            End If
+                            tagEnd = page.IndexOf("</tr>", tagBegin)
+                            Dim row As String = page.Substring(tagBegin, tagEnd - tagBegin + 5)
+                            ParseNews(row)
+                        Catch ex As Exception
+                            Util.LogMeWithTimestamp(ex, "Error while parsing player.")
+                        End Try
+                    End While
+                    _numNewsPagesProcessed += 1
+                Else
+                    timesQueueWasEmpty += 1
+                    If timesQueueWasEmpty > 6 And IsProcessingComplete() Then
+                        Util.LogMeWithTimestamp("Pages queue was empty " + timesQueueWasEmpty.ToString + " times.")
+                        Exit While
+                    End If
+                End If
+            Catch ex As Exception
+                Util.LogMeWithTimestamp(ex, "Error while parsing page.")
+            End Try
+
+        End While
+    End Sub
+
+    Private Function IsProcessingComplete() As Boolean
+        Return (_numPagesQueued = _numNewsPagesProcessed) And _finishedQueueingPages
+    End Function
 
     Private Sub FillPlayersQueue()
         Util.LogMeWithTimestamp("Filling player queue.")
         Dim allNFLPlayers As List(Of Player) = DataUtility.GetAllPlayersBySport(_conStr, _league.GetSportName)
+        _playersCount = allNFLPlayers.Count
         For Each player As Player In allNFLPlayers
             _players.Enqueue(player)
         Next
         Util.LogMeWithTimestamp("Finished filling player queue.")
     End Sub
 
-    Private Sub QueuePages()
+    Private Sub QueueNewsPages()
         Dim count As Integer = 1
         While True
             Try
                 Dim p As Player = _players.Dequeue()
                 If p IsNot Nothing Then
-                    Util.LogMeWithTimestamp("Getting page - " + p.Link + ".")
-                    Dim page As String = Util.GetWebPageAsString(p.Link)
-                    Dim tagBegin As Integer = page.IndexOf("<table class=""wisfb_standard"">")
+                    Dim newsLink As String = p.Link + "-news"
+                    Util.LogMeWithTimestamp("Getting page - " + newsLink + ".")
+                    _playerNewPagesCount += 1
+                    Dim page As String = Util.GetWebPageAsString(newsLink)
+                    Dim tagBegin As Integer = page.IndexOf("<table id=""wisfb_newsTable"">")
                     Dim tagEnd As Integer
-                    If tagBegin = -1 Then
-                        Util.LogMeWithTimestamp("No more data. Exiting thread.")
-                        _finishedQueueingPages = True
-                        Exit While
-                    Else
+                    If tagBegin <> -1 Then
                         tagEnd = page.IndexOf("</table>", tagBegin)
-                        Dim playerTable As String = page.Substring(tagBegin, tagEnd - tagBegin)
-                        _pages.Enqueue(playerTable)
+                        Dim newsTable As String = page.Substring(tagBegin, tagEnd - tagBegin)
+                        _pages.Enqueue(newsTable)
                         _numPagesQueued += 1
+                    Else
+                        Util.LogMeWithTimestamp("No news for player.")
+                    End If
+                Else
+                    If _playerNewPagesCount = _playersCount Then
+                        _finishedQueueingPages = True
+                        Util.LogMeWithTimestamp("No more data. Exiting news pages thread.")
+                        Exit While
                     End If
                 End If
 

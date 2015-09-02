@@ -8,7 +8,8 @@ Public Class frmMain
     Private _appIsOpen As Boolean = True
     Private _logFs As FileStream
     Private Delegate Sub GenDel(obj As Object)
-    Private _scraper As FoxSportsPlayerScraper
+    Private _playerScraper As FoxSportsPlayerScraper
+    Private _newsScraper As FoxSportsPlayerNewsScraper
     Private _conStr As String
     Private _insertedPlayerCount As Integer = 0
 
@@ -49,8 +50,8 @@ Public Class frmMain
             If Util.ShowMessageBox("Delete player table?", "Are you sure you want to delete the player table?", MsgBoxStyle.YesNo) = DialogResult.OK Then
                 Dim league As IProLeagues = New ProLeague(_conStr, "NFL")
                 DataUtility.DeletePlayerTable(_conStr, league)
-                _scraper = New FoxSportsPlayerScraper(My.Settings.foxRootURL, My.Settings.foxPlayersURL, league)
-                _scraper.FetchPlayers()
+                _playerScraper = New FoxSportsPlayerScraper(My.Settings.foxRootURL, My.Settings.foxPlayersURL, league)
+                _playerScraper.FetchPlayers()
                 Threading.ThreadPool.QueueUserWorkItem(AddressOf ImportPlayersToDB)
             End If
         Catch ex As Exception
@@ -62,13 +63,13 @@ Public Class frmMain
         Dim timesQueueWasEmpty As Integer = 0
         While True
             Try
-                Dim p As Player = _scraper.Players.Dequeue()
+                Dim p As Player = _playerScraper.Players.Dequeue()
                 If p IsNot Nothing Then
                     DataUtility.InsertPlayer(_conStr, p)
                     _insertedPlayerCount += 1
                 Else
                     timesQueueWasEmpty += 1
-                    If timesQueueWasEmpty > 6 And _scraper.IsProcessingComplete() Then
+                    If timesQueueWasEmpty > 6 And _playerScraper.IsProcessingComplete() Then
                         Util.LogMeWithTimestamp("Player queue was empty " + timesQueueWasEmpty.ToString + " times.")
                         Util.LogMeWithTimestamp("Done! " + _insertedPlayerCount.ToString + " players inserted.")
                         Exit While
@@ -80,4 +81,16 @@ Public Class frmMain
         End While
     End Sub
 
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Try
+            Dim league As IProLeagues = New ProLeague(_conStr, "NFL")
+            _newsScraper = New FoxSportsPlayerNewsScraper(_conStr, league)
+            _newsScraper.FetchPlayerNews()
+
+        Catch ex As Exception
+
+        End Try
+
+
+    End Sub
 End Class

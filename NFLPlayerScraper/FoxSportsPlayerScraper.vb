@@ -25,17 +25,17 @@ Public Class FoxSportsPlayerScraper
 
     Public Sub FetchPlayers()
         Util.LogMeWithTimestamp("Starting get pages thread.")
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf QueuePages, _playersUrl)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf QueuePlayerPages, _playersUrl)
         Util.LogMeWithTimestamp("Starting parse pages threads.")
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePage)
-        Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePage)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePlayerPage)
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePlayerPage)
     End Sub
 
     Public Function IsProcessingComplete() As Boolean
         Return (_numPagesQueued = _numPagesProcessed) And _finishedQueueingPages
     End Function
 
-    Private Sub ParsePage()
+    Private Sub ParsePlayerPage()
         Dim timesQueueWasEmpty As Integer = 0
         While True
             Try
@@ -159,7 +159,7 @@ Public Class FoxSportsPlayerScraper
         Players.Enqueue(p)
     End Sub
 
-    Private Sub QueuePages(url As String)
+    Private Sub QueuePlayerPages(url As String)
         Dim count As Integer = 1
         While True
             Try

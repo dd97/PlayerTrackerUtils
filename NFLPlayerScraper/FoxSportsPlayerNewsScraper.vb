@@ -8,7 +8,7 @@ Public Class FoxSportsPlayerNewsScraper
     Private _conStr As String
     Private _finishedQueueingPages As Boolean = False
     Private _numPagesQueued As Integer = 0
-    Private _pages As New ThreadSafeBlockingQueue(Of String)
+    Private _rawNewsPages As New ThreadSafeBlockingQueue(Of PlayerNews)
     Private _playersCount As Integer = 0
     Private _playerNewPagesCount As Integer = 0
     Private _numNewsPagesProcessed As Integer = 0
@@ -35,17 +35,18 @@ Public Class FoxSportsPlayerNewsScraper
         Dim timesQueueWasEmpty As Integer = 0
         While True
             Try
-                Dim page As String = _pages.Dequeue()
-                If Not String.IsNullOrEmpty(page) Then
+                Dim playerNewsInfo As PlayerNews = _rawNewsPages.Dequeue()
+                Dim news As String = playerNewsInfo.RawNews
+                If Not String.IsNullOrEmpty(news) Then
                     Dim tagBegin, tagEnd As Integer
                     While True
                         Try
-                            tagBegin = page.IndexOf("<tr", tagEnd)
+                            tagBegin = news.IndexOf("<tr", tagEnd)
                             If tagBegin = -1 Then
                                 Exit While
                             End If
-                            tagEnd = page.IndexOf("</tr>", tagBegin)
-                            Dim row As String = page.Substring(tagBegin, tagEnd - tagBegin + 5)
+                            tagEnd = news.IndexOf("</tr>", tagBegin)
+                            Dim row As String = news.Substring(tagBegin, tagEnd - tagBegin + 5)
                             ParseNews(row)
                         Catch ex As Exception
                             Util.LogMeWithTimestamp(ex, "Error while parsing player.")
@@ -86,6 +87,8 @@ Public Class FoxSportsPlayerNewsScraper
             Try
                 Dim p As Player = _players.Dequeue()
                 If p IsNot Nothing Then
+                    Dim rawNews As New PlayerNews()
+                    rawNews.PlayerInfo = p
                     Dim newsLink As String = p.Link + "-news"
                     Util.LogMeWithTimestamp("Getting page - " + newsLink + ".")
                     _playerNewPagesCount += 1
@@ -94,8 +97,8 @@ Public Class FoxSportsPlayerNewsScraper
                     Dim tagEnd As Integer
                     If tagBegin <> -1 Then
                         tagEnd = page.IndexOf("</table>", tagBegin)
-                        Dim newsTable As String = page.Substring(tagBegin, tagEnd - tagBegin)
-                        _pages.Enqueue(newsTable)
+                        rawNews.RawNews = page.Substring(tagBegin, tagEnd - tagBegin)
+                        _rawNewsPages.Enqueue(rawNews)
                         _numPagesQueued += 1
                     Else
                         Util.LogMeWithTimestamp("No news for player.")

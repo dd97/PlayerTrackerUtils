@@ -6,23 +6,23 @@ Public Class PlayerNews
 
     Public Sub New(ByVal player As Player, ByVal latest As String, ByVal injury As String, ByVal fantasy As String)
         Me.PlayerInfo = player
-        Me.LatestNews = latest
-        Me.InjuryNews = injury
-        Me.FantasyNews = fantasy
+        Me.LatestNews.Add(latest)
+        Me.InjuryNews.Add(injury)
+        Me.FantasyNews.Add(fantasy)
     End Sub
 
     Public Sub New(ByVal player As Player, ByVal latest As String, ByVal injury As String, ByVal fantasy As String, dteUpdated As String)
         Me.PlayerInfo = player
-        Me.LatestNews = latest
-        Me.InjuryNews = injury
+        Me.LatestNews.Add(latest)
+        Me.InjuryNews.Add(injury)
+        Me.FantasyNews.Add(fantasy)
         Me.DateUpdated = dteUpdated
-        Me.FantasyNews = fantasy
     End Sub
 
     Public Property PlayerInfo() As Player = Nothing
-    Public Property LatestNews() As String = String.Empty
-    Public Property InjuryNews() As String = String.Empty
-    Public Property FantasyNews() As String = String.Empty
+    Public Property LatestNews() As New List(Of String)
+    Public Property InjuryNews() As New List(Of String)
+    Public Property FantasyNews() As New List(Of String)
     Public Property DateUpdated() As String = Date.MinValue
     Public Property RawNews As String = String.Empty
 

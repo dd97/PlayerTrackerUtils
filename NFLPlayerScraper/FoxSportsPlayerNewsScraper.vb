@@ -9,6 +9,7 @@ Public Class FoxSportsPlayerNewsScraper
     Private _finishedQueueingPages As Boolean = False
     Private _numPagesQueued As Integer = 0
     Private _rawNewsPages As New ThreadSafeBlockingQueue(Of PlayerNews)
+    Private _processedNewsPages As New ThreadSafeBlockingQueue(Of PlayerNews)
     Private _playersCount As Integer = 0
     Private _playerNewPagesCount As Integer = 0
     Private _numNewsPagesProcessed As Integer = 0
@@ -24,10 +25,35 @@ Public Class FoxSportsPlayerNewsScraper
         FillPlayersQueue()
         Util.LogMeWithTimestamp("Starting get news pages thread.")
         Threading.ThreadPool.QueueUserWorkItem(AddressOf QueueNewsPages)
-
+        Threading.ThreadPool.QueueUserWorkItem(AddressOf ParsePlayerNewsPage)
     End Sub
 
-    Private Sub ParseNews(row As String)
+    Private Sub ParseNews(ByVal playerNewsInfo As PlayerNews, row As String)
+        Dim tagBegin, tagEnd As Integer
+        tagBegin = row.IndexOf("<span class=""wisfb_newsDate"">", 0)
+        If tagBegin <> -1 Then
+            tagBegin = row.IndexOf(">", tagBegin)
+            tagEnd = row.IndexOf("</span>", tagBegin)
+            Dim dateAndSource As String = row.Substring(tagBegin + 1, tagEnd - tagBegin - 1)
+            Dim source As String
+            Dim strDate As String
+            Dim d As Date
+            Dim tag1, tag2 As Integer
+            tag1 = dateAndSource.IndexOf("<strong>", 0)
+            If tag1 <> -1 Then
+                tag1 = dateAndSource.IndexOf(">", tag1)
+                tag2 = dateAndSource.IndexOf("</strong>", tag1)
+                source = dateAndSource.Substring(tag1 + 1, tag2 - tag1 - 1)
+                strDate = dateAndSource.Substring(tag2 + 9)
+                strDate = strDate.Replace("/", Date.Now.Year.ToString)
+                Date.TryParse(strDate, d)
+
+            End If
+
+        Else
+            Util.LogMeWithTimestamp("Bad data found while parsing news.")
+        End If
+
 
     End Sub
 
@@ -36,30 +62,34 @@ Public Class FoxSportsPlayerNewsScraper
         While True
             Try
                 Dim playerNewsInfo As PlayerNews = _rawNewsPages.Dequeue()
-                Dim news As String = playerNewsInfo.RawNews
-                If Not String.IsNullOrEmpty(news) Then
-                    Dim tagBegin, tagEnd As Integer
-                    While True
-                        Try
-                            tagBegin = news.IndexOf("<tr", tagEnd)
-                            If tagBegin = -1 Then
-                                Exit While
-                            End If
-                            tagEnd = news.IndexOf("</tr>", tagBegin)
-                            Dim row As String = news.Substring(tagBegin, tagEnd - tagBegin + 5)
-                            ParseNews(row)
-                        Catch ex As Exception
-                            Util.LogMeWithTimestamp(ex, "Error while parsing player.")
-                        End Try
-                    End While
-                    _numNewsPagesProcessed += 1
-                Else
-                    timesQueueWasEmpty += 1
-                    If timesQueueWasEmpty > 6 And IsProcessingComplete() Then
-                        Util.LogMeWithTimestamp("Pages queue was empty " + timesQueueWasEmpty.ToString + " times.")
-                        Exit While
+                If playerNewsInfo IsNot Nothing Then
+                    Dim news As String = playerNewsInfo.RawNews
+                    If Not String.IsNullOrEmpty(news) Then
+                        Dim tagBegin, tagEnd As Integer
+                        While True
+                            Try
+                                tagBegin = news.IndexOf("<tr", tagEnd)
+                                If tagBegin = -1 Then
+                                    Exit While
+                                End If
+                                tagEnd = news.IndexOf("</tr>", tagBegin)
+                                Dim row As String = news.Substring(tagBegin, tagEnd - tagBegin + 5)
+                                ParseNews(playerNewsInfo, row)
+                            Catch ex As Exception
+                                Util.LogMeWithTimestamp(ex, "Error while parsing player.")
+                            End Try
+                        End While
+                        _processedNewsPages.Enqueue(playerNewsInfo)
+                        _numNewsPagesProcessed += 1
+                    Else
+                        timesQueueWasEmpty += 1
+                        If timesQueueWasEmpty > 6 And IsProcessingComplete() Then
+                            Util.LogMeWithTimestamp("Pages queue was empty " + timesQueueWasEmpty.ToString + " times.")
+                            Exit While
+                        End If
                     End If
                 End If
+
             Catch ex As Exception
                 Util.LogMeWithTimestamp(ex, "Error while parsing page.")
             End Try

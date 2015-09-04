@@ -88,7 +88,7 @@ Public Class frmMain
             _newsScraper.FetchPlayerNews()
 
         Catch ex As Exception
-
+            Util.LogMeWithTimestamp(ex, "Error getting player news.")
         End Try
 
 

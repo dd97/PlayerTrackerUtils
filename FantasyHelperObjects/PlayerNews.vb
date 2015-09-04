@@ -25,6 +25,8 @@ Public Class PlayerNews
     Public Property FantasyNews() As New List(Of String)
     Public Property DateUpdated() As String = Date.MinValue
     Public Property RawNews As String = String.Empty
+    Public Property Source As String = String.Empty
+
 
 End Class
 

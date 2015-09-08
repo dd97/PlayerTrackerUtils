@@ -108,7 +108,7 @@ Public Class frmMain
     ''' <param name="e"></param>
     Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
         Dim str As String = "Jun 17 / 4:05p ET"
-        Dim left As String = "Jun 17 2015 4:05 pm"
+        Dim left As String = "Jun 17 2015 4:05pm"
         Dim d As Date
         Date.TryParse(left, d)
 

@@ -43,10 +43,16 @@ Public Class FoxSportsPlayerNewsScraper
             If tag1 <> -1 Then
                 tag1 = dateAndSource.IndexOf(">", tag1)
                 tag2 = dateAndSource.IndexOf("</strong>", tag1)
-                source = dateAndSource.Substring(tag1 + 1, tag2 - tag1 - 1)
-                strDate = dateAndSource.Substring(tag2 + 9)
+                source = dateAndSource.Substring(tag1 + 1, tag2 - tag1 - 1).Trim()
+                strDate = dateAndSource.Substring(tag2 + 9).Trim()
+                If strDate.Contains("/") Then
+                    Dim left As String = strDate.Split("/")(0)
+                    Dim right As String = strDate.Split("/")(1)
+                    ParseFoxDate(left, right)
+                End If
                 strDate = strDate.Replace("/", Date.Now.Year.ToString)
-                Date.TryParse(strDate, d)
+
+                ' Date.TryParseExact(strDate, "MMM d yyyy hh:mmt", Nothing, Globalization.DateTimeStyles.None, d)
 
             End If
 
@@ -56,6 +62,18 @@ Public Class FoxSportsPlayerNewsScraper
 
 
     End Sub
+
+    Private Function ParseFoxDate(left As String, right As String) As String
+        'left side will be short month name and the day
+        'right side will be the time of day
+        Dim d As Date = Date.MinValue
+        left = left.Trim()
+        left += " " + Date.Now.Year.ToString
+        Date.TryParse(left, d)
+
+
+    End Function
+
 
     Private Sub ParsePlayerNewsPage()
         Dim timesQueueWasEmpty As Integer = 0

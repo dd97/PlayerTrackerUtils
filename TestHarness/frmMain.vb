@@ -44,7 +44,11 @@ Public Class frmMain
             Me.TextBox1.AppendText(CType(obj, String))
         End If
     End Sub
-
+    ''' <summary>
+    ''' import players button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         Try
             If Util.ShowMessageBox("Delete player table?", "Are you sure you want to delete the player table?", MsgBoxStyle.YesNo) = DialogResult.OK Then
@@ -80,7 +84,11 @@ Public Class frmMain
             End Try
         End While
     End Sub
-
+    ''' <summary>
+    ''' get news button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         Try
             Dim league As IProLeagues = New ProLeague(_conStr, "NFL")
@@ -91,6 +99,18 @@ Public Class frmMain
             Util.LogMeWithTimestamp(ex, "Error getting player news.")
         End Try
 
+
+    End Sub
+    ''' <summary>
+    ''' misc test button
+    ''' </summary> 
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Dim str As String = "Jun 17 / 4:05p ET"
+        Dim left As String = "Jun 17 2015 4:05 pm"
+        Dim d As Date
+        Date.TryParse(left, d)
 
     End Sub
 End Class

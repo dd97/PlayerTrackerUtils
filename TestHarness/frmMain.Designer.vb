@@ -26,6 +26,7 @@ Partial Class frmMain
         Me.GroupBox1 = New System.Windows.Forms.GroupBox()
         Me.TextBox1 = New System.Windows.Forms.TextBox()
         Me.Button2 = New System.Windows.Forms.Button()
+        Me.Button3 = New System.Windows.Forms.Button()
         Me.GroupBox1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -69,11 +70,21 @@ Partial Class frmMain
         Me.Button2.Text = "get player news"
         Me.Button2.UseVisualStyleBackColor = True
         '
+        'Button3
+        '
+        Me.Button3.Location = New System.Drawing.Point(379, 21)
+        Me.Button3.Name = "Button3"
+        Me.Button3.Size = New System.Drawing.Size(129, 23)
+        Me.Button3.TabIndex = 3
+        Me.Button3.Text = "test"
+        Me.Button3.UseVisualStyleBackColor = True
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(860, 268)
+        Me.Controls.Add(Me.Button3)
         Me.Controls.Add(Me.Button2)
         Me.Controls.Add(Me.GroupBox1)
         Me.Controls.Add(Me.Button1)
@@ -89,4 +100,5 @@ Partial Class frmMain
     Friend WithEvents GroupBox1 As GroupBox
     Friend WithEvents TextBox1 As TextBox
     Friend WithEvents Button2 As Button
+    Friend WithEvents Button3 As Button
 End Class
